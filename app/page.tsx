@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
+import { Heart, MessageCircle, Repeat2 } from 'lucide-react';
 
 interface Tweet {
   id: string;
@@ -31,6 +32,7 @@ export default function Home() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
   const [profiles, setProfiles] = useState<Map<string, UserProfile>>(new Map());
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
 
   // ユーザー情報と認証状態の確認
@@ -267,10 +269,10 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
+      <div className="flex h-screen items-center justify-center bg-teal-50">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
-          <p className="mt-4 text-gray-600">読み込み中...</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400" />
+          <p className="mt-4 text-gray-500">読み込み中...</p>
         </div>
       </div>
     );
@@ -279,12 +281,17 @@ export default function Home() {
   // ログアウト状態：ログイン画面
   if (!user) {
     return (
-      <div className="flex h-screen items-center justify-center bg-white">
-        <div className="max-w-sm w-full text-center">
-          <h1 className="text-6xl font-black text-blue-400 mb-4">𝕏</h1>
-          <h2 className="text-4xl font-bold mb-4">今起きていることを知ろう</h2>
+      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-teal-50 to-cyan-50">
+        <div className="max-w-sm w-full text-center px-4">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-400 to-emerald-500 mx-auto mb-6 flex items-center justify-center shadow-lg">
+            <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C7.6 2 4 5.3 4 9.4c0 2.7 1.4 5.1 3.6 6.6L12 22l4.4-6c2.2-1.5 3.6-3.9 3.6-6.6C20 5.3 16.4 2 12 2zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/>
+            </svg>
+          </div>
+          <h1 className="text-5xl font-black bg-gradient-to-r from-cyan-400 to-emerald-500 bg-clip-text text-transparent mb-4">cloneX</h1>
+          <h2 className="text-3xl font-bold text-gray-800 mb-3">今起きていることを知ろう</h2>
           <p className="text-gray-600 text-lg mb-8">
-            Twitter Clone に参加しましょう
+            cloneX に参加しましょう
           </p>
 
           <button
@@ -294,7 +301,7 @@ export default function Home() {
                 options: { redirectTo: window.location.origin + '/auth/callback' },
               });
             }}
-            className="w-full rounded-full bg-blue-500 px-8 py-3 text-white font-bold text-lg hover:bg-blue-600 mb-4"
+            className="w-full rounded-full bg-gradient-to-r from-cyan-400 to-emerald-500 px-8 py-3 text-white font-bold text-lg hover:-translate-y-0.5 shadow-md hover:shadow-lg transition-all duration-200 mb-4"
           >
             Googleでログイン
           </button>
@@ -309,100 +316,195 @@ export default function Home() {
 
   // ログイン状態：ホームタイムライン
   return (
-    <div className="min-h-screen bg-white">
-      {/* ヘッダー */}
-      <div className="border-b border-gray-200 sticky top-0 bg-white bg-opacity-80 backdrop-blur z-10">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="text-xl font-bold">ホーム</h1>
-          <div className="flex gap-2">
-            <button
-              onClick={() => router.push('/profile/me')}
-              className="text-sm text-blue-500 hover:text-blue-600 font-bold"
-            >
-              👤 マイプロフィール
-            </button>
-            <button
-              onClick={handleLogout}
-              className="text-sm text-gray-500 hover:text-blue-500 font-bold"
-            >
-              ログアウト
-            </button>
+    <div className="min-h-screen bg-teal-50 flex">
+      {/* ============ LEFT SIDEBAR ============ */}
+      <aside className="w-56 h-screen sticky top-0 bg-white border-r border-gray-200 flex flex-col gap-2 px-3 py-4 flex-shrink-0 z-10">
+        {/* Logo */}
+        <div className="px-3 py-1.5 mb-4">
+          <div className="inline-flex items-center gap-2">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400 to-emerald-500 flex items-center justify-center shadow-sm">
+              <svg className="w-4.5 h-4.5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C7.6 2 4 5.3 4 9.4c0 2.7 1.4 5.1 3.6 6.6L12 22l4.4-6c2.2-1.5 3.6-3.9 3.6-6.6C20 5.3 16.4 2 12 2zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/>
+              </svg>
+            </div>
+            <span className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-emerald-500 bg-clip-text text-transparent">cloneX</span>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-2xl mx-auto">
-        {/* ツイート投稿エリア */}
-        <div className="border-b border-gray-200 p-4">
-          <div className="flex gap-4">
-            <div className="w-12 h-12 rounded-full bg-blue-500 flex-shrink-0" />
-            <div className="flex-1">
-              <textarea
-                value={tweetInput}
-                onChange={(e) => setTweetInput(e.target.value)}
-                placeholder="いま、何してる？"
-                maxLength={280}
-                className="w-full text-xl placeholder-gray-500 outline-none resize-none"
-                rows={4}
-              />
-              <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
-                <span className="text-sm text-gray-500">
-                  {tweetInput.length}/280
-                </span>
-                <button
-                  onClick={handlePost}
-                  disabled={!tweetInput.trim() || isPosting || tweetInput.length > 280}
-                  className="rounded-full bg-blue-500 px-6 py-2 text-white font-bold hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isPosting ? 'ポスト中...' : 'ポスト'}
-                </button>
+        {/* Nav Items */}
+        <nav className="space-y-1 flex-1">
+          <button
+            onClick={() => window.location.reload()}
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-gray-800 font-medium text-[15px] hover:bg-cyan-50 transition-all duration-150"
+          >
+            <svg className="w-5 h-5 text-cyan-400" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+            <span>ホーム</span>
+          </button>
+          <button
+            onClick={() => router.push('/profile/me')}
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-gray-800 hover:bg-cyan-50 transition-all duration-150 font-medium text-[15px]"
+          >
+            <svg className="w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+            </svg>
+            <span>プロフィール</span>
+          </button>
+        </nav>
+
+        {/* Spacer */}
+        <div className="flex-1"></div>
+
+        {/* Post Button */}
+        <button
+          onClick={() => setIsPostModalOpen(true)}
+          className="w-full py-3 rounded-full bg-gradient-to-r from-cyan-400 to-emerald-500 text-white font-semibold text-[15px] hover:-translate-y-0.5 shadow-md hover:shadow-lg transition-all duration-200 mb-2"
+        >
+          ✦ つぶやく
+        </button>
+
+        {/* User Chip */}
+        <div className="flex items-center gap-2.5 px-3 py-3 rounded-2xl hover:bg-teal-50 transition-colors group">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400 to-emerald-500 flex items-center justify-center text-white font-bold text-xs flex-shrink-0 shadow-sm overflow-hidden">
+            {profiles.get(user.id)?.avatar_url ? (
+              <img src={profiles.get(user.id)?.avatar_url} alt="avatar" className="w-full h-full object-contain" />
+            ) : (
+              user.email?.[0].toUpperCase()
+            )}
+          </div>
+          <div className="text-left flex-1 min-w-0">
+            <div className="text-sm font-semibold text-gray-800 truncate">
+              {profiles.get(user.id)?.display_name || user.email?.split('@')[0] || 'ユーザー'}
+            </div>
+            <div className="text-xs text-gray-500 truncate">
+              @{profiles.get(user.id)?.handle || user.email?.split('@')[0]}
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="text-gray-400 hover:text-red-500 transition opacity-0 group-hover:opacity-100"
+            title="ログアウト"
+          >
+            🚪
+          </button>
+        </div>
+      </aside>
+
+      {/* ============ MAIN CONTENT ============ */}
+      <main className="flex-1 bg-white border-r border-gray-200 min-h-screen overflow-y-auto max-w-xl">
+        {/* Sticky Header */}
+        <div className="sticky top-0 z-50 bg-white/85 backdrop-blur border-b border-gray-200 px-5 py-3.5">
+          <h2 className="m-0 text-[17px] font-bold text-gray-800 tracking-tight">ホーム</h2>
+        </div>
+
+      {/* ツイート投稿モーダル */}
+      {isPostModalOpen && (
+        <div className="fixed inset-0 bg-transparent flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-lg">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold text-gray-800">つぶやきを投稿</h2>
+              <button
+                onClick={() => setIsPostModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 transition text-xl"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex gap-4">
+              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-cyan-400 to-emerald-500 flex-shrink-0 flex items-center justify-center text-white font-bold text-sm shadow-sm overflow-hidden">
+                {profiles.get(user.id)?.avatar_url ? (
+                  <img src={profiles.get(user.id)?.avatar_url} alt="avatar" className="w-full h-full object-contain" />
+                ) : (
+                  user.email?.[0].toUpperCase()
+                )}
+              </div>
+              <div className="flex-1">
+                <textarea
+                  value={tweetInput}
+                  onChange={(e) => setTweetInput(e.target.value)}
+                  placeholder="今どうしてる？"
+                  maxLength={280}
+                  className="w-full text-base placeholder-gray-400 outline-none resize-none bg-transparent p-0 text-gray-700 font-normal"
+                  rows={4}
+                  autoFocus
+                  style={{ fontFamily: 'Inter, sans-serif' }}
+                />
+                <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+                  <span className="text-sm text-gray-500 font-medium">
+                    {tweetInput.length}/280
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setIsPostModalOpen(false);
+                        setTweetInput('');
+                      }}
+                      className="px-5 py-2 text-gray-700 font-semibold hover:bg-gray-50 rounded-full text-sm transition-colors"
+                    >
+                      キャンセル
+                    </button>
+                    <button
+                      onClick={async () => {
+                        await handlePost();
+                        setIsPostModalOpen(false);
+                      }}
+                      disabled={!tweetInput.trim() || isPosting || tweetInput.length > 280}
+                      className="rounded-full bg-gradient-to-r from-cyan-400 to-emerald-500 px-6 py-2 text-white font-semibold hover:-translate-y-0.5 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm"
+                    >
+                      {isPosting ? '投稿中...' : 'つぶやく'}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+      )}
 
         {/* ツイート一覧 */}
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-gray-100">
           {tweets.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-12 text-center text-gray-500 text-[15px]">
               ツイートがありません
             </div>
           ) : (
             tweets.map((tweet) => (
               <div
                 key={tweet.id}
-                className="p-4 hover:bg-gray-50 transition border-b border-gray-200 last:border-b-0"
+                className="px-5 py-4 hover:bg-cyan-50/40 transition-colors duration-150 border-b border-gray-100 last:border-b-0 cursor-pointer"
               >
                 {editingId === tweet.id ? (
                   // 編集モード
                   <div className="flex gap-3">
-                    <div className="w-12 h-12 rounded-full bg-blue-500 flex-shrink-0" />
+                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-cyan-400 to-emerald-500 flex-shrink-0" />
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
                         <button
                           onClick={() => router.push(`/profile/${tweet.user_id}`)}
-                          className="font-bold hover:underline text-left"
+                          className="font-semibold text-gray-800 hover:underline text-left text-sm"
                         >
-                          @{tweet.user_id.slice(0, 8)}
+                          {profiles.get(tweet.user_id)?.display_name || 'ユーザー'}
                         </button>
                       </div>
                       <textarea
                         value={editingContent}
                         onChange={(e) => setEditingContent(e.target.value)}
                         maxLength={280}
-                        className="w-full p-2 border border-blue-500 rounded text-gray-900 resize-none"
+                        className="w-full p-2 border border-cyan-400 rounded text-gray-800 resize-none text-[15px]"
                         rows={3}
                       />
                       <div className="flex gap-2 mt-3">
                         <button
                           onClick={() => handleSaveEdit(tweet.id)}
-                          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm font-bold"
+                          className="px-4 py-1.5 bg-gradient-to-r from-cyan-400 to-emerald-500 text-white rounded-full hover:shadow-md text-xs font-semibold transition-all"
                         >
                           保存
                         </button>
                         <button
                           onClick={handleCancelEdit}
-                          className="px-4 py-2 bg-gray-300 text-gray-900 rounded hover:bg-gray-400 text-sm font-bold"
+                          className="px-4 py-1.5 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 text-xs font-semibold transition-colors"
                         >
                           キャンセル
                         </button>
@@ -412,29 +514,49 @@ export default function Home() {
                 ) : (
                   // 表示モード
                   <div className="flex gap-3">
-                    <div className="w-12 h-12 rounded-full bg-blue-500 flex-shrink-0" />
+                    <button
+                      onClick={() => router.push(`/profile/${tweet.user_id}`)}
+                      className="w-11 h-11 rounded-full bg-gradient-to-br from-cyan-400 to-emerald-500 flex-shrink-0 flex items-center justify-center text-white font-bold text-xs shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+                    >
+                      {profiles.get(tweet.user_id)?.avatar_url ? (
+                        <img src={profiles.get(tweet.user_id)?.avatar_url} alt="avatar" className="w-full h-full object-contain" />
+                      ) : (
+                        tweet.user_id.slice(0, 1).toUpperCase()
+                      )}
+                    </button>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => router.push(`/profile/${tweet.user_id}`)}
-                            className="font-bold hover:underline"
-                          >
-                            {profiles.get(tweet.user_id)?.display_name || 'ユーザー'}
-                          </button>
-                          {followingIds.has(tweet.user_id) && (
-                            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-bold">
-                              フォロー中
-                            </span>
-                          )}
-                          <span className="text-gray-500 text-sm">
-                            {formatRelativeTime(tweet.created_at)}
-                          </span>
-                        </div>
+                      <div className="flex items-baseline gap-1.5 mb-1 flex-wrap">
+                        <button
+                          onClick={() => router.push(`/profile/${tweet.user_id}`)}
+                          className="font-semibold text-gray-800 hover:underline text-[14px]"
+                        >
+                          {profiles.get(tweet.user_id)?.display_name || 'ユーザー'}
+                        </button>
+                        <span className="text-gray-500 text-[13px]">
+                          @{profiles.get(tweet.user_id)?.handle || tweet.user_id.slice(0, 8)}
+                        </span>
+                        <span className="text-gray-400 text-[12px]">·</span>
+                        <span className="text-gray-400 text-[12px]">
+                          {formatRelativeTime(tweet.created_at)}
+                        </span>
                       </div>
-                      <p className="text-gray-900 mt-2 break-words whitespace-pre-wrap">
+                      <p className="text-gray-700 text-[14px] leading-snug mt-2 break-words whitespace-pre-wrap mb-3">
                         {tweet.content}
                       </p>
+                      <div className="flex gap-1 -mx-2">
+                        <button className="flex items-center gap-1.5 px-2.5 py-1.5 text-gray-500 rounded-full hover:bg-cyan-50 hover:text-cyan-400 transition-all text-[13px] group">
+                          <MessageCircle className="w-3.5 h-3.5" />
+                          <span className="group-hover:block hidden">0</span>
+                        </button>
+                        <button className="flex items-center gap-1.5 px-2.5 py-1.5 text-gray-500 rounded-full hover:bg-green-50 hover:text-emerald-500 transition-all text-[13px] group">
+                          <Repeat2 className="w-3.5 h-3.5" />
+                          <span className="group-hover:block hidden">0</span>
+                        </button>
+                        <button className="flex items-center gap-1.5 px-2.5 py-1.5 text-gray-500 rounded-full hover:bg-rose-50 hover:text-rose-500 transition-all text-[13px] group">
+                          <Heart className="w-3.5 h-3.5" />
+                          <span className="group-hover:block hidden">0</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -442,7 +564,7 @@ export default function Home() {
             ))
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 }
