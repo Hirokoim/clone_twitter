@@ -82,11 +82,11 @@ export default function Home() {
     try {
       const { data, error } = await supabase
         .from('follows')
-        .select('following_id')
+        .select('followee_id')
         .eq('follower_id', user.id);
 
       if (error) throw error;
-      setFollowingIds(new Set(data.map((f) => f.following_id)));
+      setFollowingIds(new Set(data.map((f) => f.followee_id)));
     } catch (error) {
       console.error('フォロー情報読み込みエラー:', error);
     }
@@ -205,7 +205,7 @@ export default function Home() {
     try {
       const { error } = await supabase
         .from('follows')
-        .insert({ follower_id: user.id, following_id: followeeId });
+        .insert({ follower_id: user.id, followee_id: followeeId });
 
       if (error) throw error;
 
@@ -225,7 +225,7 @@ export default function Home() {
         .from('follows')
         .delete()
         .eq('follower_id', user.id)
-        .eq('following_id', followeeId);
+        .eq('followee_id', followeeId);
 
       if (error) throw error;
 
